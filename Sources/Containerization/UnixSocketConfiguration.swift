@@ -47,6 +47,16 @@ public struct UnixSocketConfiguration: Sendable {
     /// onto your host.
     public var direction: Direction
 
+    /// The uid to set for the socket file. Defaults to 0 (root).
+    /// For .into direction this will be the socket in the guest.
+    /// For .outOf direction this will be the socket on the host.
+    public var uid: uid_t?
+
+    /// The gid to set for the socket file. Defaults to 0 (root).
+    /// For .into direction this will be the socket in the guest.
+    /// For .outOf direction this will be the socket on the host.
+    public var gid: gid_t?
+
     /// Type that denotes the direction of the unix socket relay.
     public enum Direction: Sendable {
         /// Share the socket into the container/guest.
@@ -59,11 +69,15 @@ public struct UnixSocketConfiguration: Sendable {
         source: URL,
         destination: URL,
         permissions: FilePermissions? = nil,
+        uid: uid_t? = nil,
+        gid: gid_t? = nil,
         direction: Direction = .into
     ) {
         self.source = source
         self.destination = destination
         self.permissions = permissions
+        self.uid = uid
+        self.gid = gid
         self.direction = direction
     }
 }

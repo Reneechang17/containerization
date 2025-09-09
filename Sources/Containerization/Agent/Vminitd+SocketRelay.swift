@@ -24,6 +24,14 @@ extension Vminitd: SocketRelayAgent {
             if let perms = configuration.permissions {
                 $0.guestSocketPermissions = UInt32(perms.rawValue)
             }
+            
+            if let uid = configuration.uid {
+                $0.guestSocketUid = uid
+            }
+
+            if let gid = configuration.gid {
+                $0.guestSocketGid = gid
+            }
 
             switch configuration.direction {
             case .into:
