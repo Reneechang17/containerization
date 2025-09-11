@@ -164,12 +164,22 @@ extension Initd: Com_Apple_Containerization_Sandbox_V3_SandboxContextAsyncProvid
             ])
 
         do {
+            let socketUser: VsockProxy.SocketUser?
+            if request.hasUsername {
+                socketUser = .username(request.username)
+            } else if request.hasUid {
+                socketUser = .uidGid(uid: request.uid, gid: request.gid ?? request.uid)
+            } else {
+                socketUser = nil
+            }
+
             let proxy = VsockProxy(
                 id: request.id,
                 action: request.action == .into ? .dial : .listen,
                 port: request.vsockPort,
                 path: URL(fileURLWithPath: request.guestPath),
                 udsPerms: request.guestSocketPermissions,
+                user: socketUser,
                 log: log
             )
 
