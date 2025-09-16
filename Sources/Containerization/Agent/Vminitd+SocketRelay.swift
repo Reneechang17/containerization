@@ -25,6 +25,17 @@ extension Vminitd: SocketRelayAgent {
                 $0.guestSocketPermissions = UInt32(perms.rawValue)
             }
 
+            // Set user ownership based on the SocketUser enum
+            if let user = configuration.user {
+                switch user {
+                case .uidGid(let uid, let gid):
+                    $0.uid = uid
+                    $0.gid = gid
+                case .username(let name):
+                    $0.username = name
+                }
+            }
+
             switch configuration.direction {
             case .into:
                 $0.guestPath = configuration.destination.path

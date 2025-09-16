@@ -17,6 +17,14 @@
 import Foundation
 import SystemPackage
 
+/// Represents the user who own the socket
+public enum SocketUser: Sendable {
+    /// Specific uid/gid pair
+    case uidGid(uid: uid_t, gid: gid_t)
+    /// Username to be resolved in the guest
+    case username(String)
+}
+
 /// Represents a UnixSocket that can be shared into or out of a container/guest.
 public struct UnixSocketConfiguration: Sendable {
     // TODO: Realistically, we can just hash this struct and use it as the "id".
@@ -42,6 +50,11 @@ public struct UnixSocketConfiguration: Sendable {
     /// .outOf direction this will be the socket on the host.
     public var permissions: FilePermissions?
 
+    /// The user who own the socket. For .into direction this will
+    /// be the socket in the guest. For .outOf direction this will
+    /// be the socket on the host.
+    public var user: SocketUser?
+
     /// The direction of the relay. `.into` for sharing a unix socket on your
     /// host into the container/guest. `outOf` shares a socket in the container/guest
     /// onto your host.
@@ -59,11 +72,13 @@ public struct UnixSocketConfiguration: Sendable {
         source: URL,
         destination: URL,
         permissions: FilePermissions? = nil,
+        user: SocketUser? = nil,
         direction: Direction = .into
     ) {
         self.source = source
         self.destination = destination
         self.permissions = permissions
+        self.user = user
         self.direction = direction
     }
 }

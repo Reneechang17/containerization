@@ -25,6 +25,11 @@ actor VsockProxy {
         case dial
     }
 
+    enum SocketUser {
+        case uidGid(uid: uid_t, gid: gid_t)
+        case username(String)
+    }
+
     private enum SocketType {
         case unix
         case vsock
@@ -36,6 +41,7 @@ actor VsockProxy {
         port: UInt32,
         path: URL,
         udsPerms: UInt32?,
+        user: SocketUser?,
         log: Logger? = nil
     ) {
         self.id = id
@@ -43,6 +49,7 @@ actor VsockProxy {
         self.port = port
         self.path = path
         self.udsPerms = udsPerms
+        self.user = user
         self.log = log
     }
 
@@ -51,6 +58,7 @@ actor VsockProxy {
     private let action: Action
     private let port: UInt32
     private let udsPerms: UInt32?
+    private let user: SocketUser?
     private let log: Logger?
 
     private var listener: Socket?
@@ -99,6 +107,27 @@ extension VsockProxy {
             unlinkExisting: true
         )
         let uds = try Socket(type: type)
+
+        // Set socket ownership based on user specification
+        if let user = self.user {
+            let (uid, gid): (uid_t, gid_t)
+            switch user {
+            case .uidGid(let u, let g):
+                uid = u
+                gid = g
+            case .username(let name):
+                // Use User.getExecUser to resolve username to uid/gid
+                let execUser = try User.getExecUser(userString: name)
+                uid = execUser.uid
+                gid = execUser.gid
+            }
+
+            // Set ownership to the socket file
+            if chown(self.path.path, uid, gid) != 0 {
+                throw POSIXError(.init(rawValue: errno)!)
+            }
+        }
+
         try uds.listen()
         listener = uds
 

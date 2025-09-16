@@ -180,7 +180,40 @@ public struct Com_Apple_Containerization_Sandbox_V3_ProxyVsockRequest: Sendable 
 
   public var action: Com_Apple_Containerization_Sandbox_V3_ProxyVsockRequest.Action = .into
 
+  public var user: Com_Apple_Containerization_Sandbox_V3_ProxyVsockRequest.OneOf_User? = nil
+
+  public var uid: UInt32 {
+    get {
+      if case .uid(let v)? = user {return v}
+      return 0
+    }
+    set {user = .uid(newValue)}
+  }
+
+  public var username: String {
+    get {
+      if case .username(let v)? = user {return v}
+      return String()
+    }
+    set {user = .username(newValue)}
+  }
+
+  public var gid: UInt32 {
+    get {return _gid ?? 0}
+    set {_gid = newValue}
+  }
+  /// Returns true if `gid` has been explicitly set.
+  public var hasGid: Bool {return self._gid != nil}
+  /// Clears the value of `gid`. Subsequent reads from it will return its default value.
+  public mutating func clearGid() {self._gid = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public enum OneOf_User: Equatable, Sendable {
+    case uid(UInt32)
+    case username(String)
+
+  }
 
   public enum Action: SwiftProtobuf.Enum, Swift.CaseIterable {
     public typealias RawValue = Int
@@ -219,6 +252,7 @@ public struct Com_Apple_Containerization_Sandbox_V3_ProxyVsockRequest: Sendable 
   public init() {}
 
   fileprivate var _guestSocketPermissions: UInt32? = nil
+  fileprivate var _gid: UInt32? = nil
 }
 
 public struct Com_Apple_Containerization_Sandbox_V3_ProxyVsockResponse: Sendable {
@@ -1244,6 +1278,9 @@ extension Com_Apple_Containerization_Sandbox_V3_ProxyVsockRequest: SwiftProtobuf
     3: .same(proto: "guestPath"),
     4: .same(proto: "guestSocketPermissions"),
     5: .same(proto: "action"),
+    6: .same(proto: "uid"),
+    7: .same(proto: "username"),
+    8: .same(proto: "gid"),
   ]
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1257,6 +1294,23 @@ extension Com_Apple_Containerization_Sandbox_V3_ProxyVsockRequest: SwiftProtobuf
       case 3: try { try decoder.decodeSingularStringField(value: &self.guestPath) }()
       case 4: try { try decoder.decodeSingularUInt32Field(value: &self._guestSocketPermissions) }()
       case 5: try { try decoder.decodeSingularEnumField(value: &self.action) }()
+      case 6: try {
+        var v: UInt32?
+        try decoder.decodeSingularUInt32Field(value: &v)
+        if let v = v {
+          if self.user != nil {try decoder.handleConflictingOneOf()}
+          self.user = .uid(v)
+        }
+      }()
+      case 7: try {
+        var v: String?
+        try decoder.decodeSingularStringField(value: &v)
+        if let v = v {
+          if self.user != nil {try decoder.handleConflictingOneOf()}
+          self.user = .username(v)
+        }
+      }()
+      case 8: try { try decoder.decodeSingularUInt32Field(value: &self._gid) }()
       default: break
       }
     }
@@ -1282,6 +1336,20 @@ extension Com_Apple_Containerization_Sandbox_V3_ProxyVsockRequest: SwiftProtobuf
     if self.action != .into {
       try visitor.visitSingularEnumField(value: self.action, fieldNumber: 5)
     }
+    switch self.user {
+    case .uid?: try {
+      guard case .uid(let v)? = self.user else { preconditionFailure() }
+      try visitor.visitSingularUInt32Field(value: v, fieldNumber: 6)
+    }()
+    case .username?: try {
+      guard case .username(let v)? = self.user else { preconditionFailure() }
+      try visitor.visitSingularStringField(value: v, fieldNumber: 7)
+    }()
+    case nil: break
+    }
+    try { if let v = self._gid {
+      try visitor.visitSingularUInt32Field(value: v, fieldNumber: 8)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1291,6 +1359,8 @@ extension Com_Apple_Containerization_Sandbox_V3_ProxyVsockRequest: SwiftProtobuf
     if lhs.guestPath != rhs.guestPath {return false}
     if lhs._guestSocketPermissions != rhs._guestSocketPermissions {return false}
     if lhs.action != rhs.action {return false}
+    if lhs.user != rhs.user {return false}
+    if lhs._gid != rhs._gid {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

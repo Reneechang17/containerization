@@ -101,6 +101,11 @@ message ProxyVsockRequest {
   string guestPath = 3;
   optional uint32 guestSocketPermissions = 4;
   Action action = 5;
+  oneof user {
+    uint32 uid = 6;
+    string username = 7;
+  }
+  optional uint32 gid = 8;
 }
 
 message ProxyVsockResponse {}
